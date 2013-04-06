@@ -56,7 +56,7 @@ Have to check for some usage of code (e.g. AttributeDict from fabric) is covered
 TODOs
 -----
 
-# -Make a TODO list-
-# Find a way to programmatically test the results
-# Support other PS commands
-# Improve the current ones
+1. ~~Make a TODO list~~
+2. Find a way to programmatically test the results
+3. Support other PS commands
+4. Improve the current ones
