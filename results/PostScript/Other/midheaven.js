@@ -1,0 +1,38 @@
+function midheaven(){
+    var path = new CompoundPath();
+    path.moveTo([0.914, 1.0]);
+    path.cubicCurveTo([1.5, 2.156], [1.848, 3.34], [1.957, 4.559]);
+    path.lineTo([1.305, 37.133]);
+    path.cubicCurveTo([1.059, 38.629], [0.625, 39.906], [0.0, 40.969]);
+    path.lineTo([5.09, 40.969]);
+    path.cubicCurveTo([4.465, 40.012], [4.055, 38.98], [3.852, 37.879]);
+    path.lineTo([4.109, 9.332]);
+    path.lineTo([11.898, 41.0]);
+    path.lineTo([14.289, 40.969]);
+    path.lineTo([21.859, 8.676]);
+    path.lineTo([22.316, 37.227]);
+    path.cubicCurveTo([22.098, 38.703], [21.688, 39.949], [21.078, 40.969]);
+    path.lineTo([28.582, 40.969]);
+    path.cubicCurveTo([27.984, 39.918], [27.594, 38.797], [27.406, 37.598]);
+    path.lineTo([26.625, 5.68]);
+    path.cubicCurveTo([26.637, 3.359], [27.094, 1.832], [27.992, 1.094]);
+    path.lineTo([21.184, 1.094]);
+    path.lineTo([14.289, 29.922]);
+    path.lineTo([7.375, 1.0]);
+    path.lineTo([0.914, 1.0]);
+    path.moveTo([34.387, 1.281]);
+    path.cubicCurveTo([33.977, 1.324], [33.613, 1.375], [33.301, 1.437]);
+    path.cubicCurveTo([32.996, 1.5], [32.531, 1.695], [31.91, 2.031]);
+    path.cubicCurveTo([28.082, 5.254], [26.797, 9.902], [28.059, 15.977]);
+    path.cubicCurveTo([29.145, 19.473], [30.863, 21.562], [33.215, 22.25]);
+    path.cubicCurveTo([35.688, 22.664], [37.773, 21.82], [39.477, 19.723]);
+    path.lineTo([40.0, 16.539]);
+    path.cubicCurveTo([38.152, 19.629], [36.02, 20.719], [33.605, 19.812]);
+    path.cubicCurveTo([31.309, 18.148], [30.285, 15.312], [30.539, 11.297]);
+    path.cubicCurveTo([30.371, 6.992], [31.461, 4.277], [33.801, 3.152]);
+    path.cubicCurveTo([36.145, 2.727], [37.949, 4.191], [39.219, 7.551]);
+    path.lineTo([39.152, 2.684]);
+    path.lineTo([38.957, 2.684]);
+    path.cubicCurveTo([37.449, 1.695], [35.926, 1.23], [34.387, 1.281]);
+    return {name:"midheaven",width:40, height:41,path:path};
+}

@@ -1,0 +1,33 @@
+function libra(){
+    var path = new CompoundPath();
+    path.moveTo([0.0, 188.0]);
+    path.lineTo([0.0, 167.18]);
+    path.lineTo([225.0, 167.18]);
+    path.lineTo([225.0, 188.0]);
+    path.closePath();
+    path.moveTo([88.938, 105.867]);
+    path.lineTo([88.938, 125.332]);
+    path.lineTo([0.0, 125.332]);
+    path.lineTo([0.0, 104.41]);
+    path.lineTo([62.348, 104.41]);
+    path.cubicCurveTo([50.984, 92.855], [45.355, 79.844], [45.355, 65.477]);
+    path.cubicCurveTo([45.355, 47.574], [52.027, 32.27], [65.27, 19.363]);
+    path.cubicCurveTo([78.512, 6.453], [94.254, 0.0], [112.605, 0.0]);
+    path.cubicCurveTo([130.852, 0.0], [146.594, 6.453], [159.836, 19.363]);
+    path.cubicCurveTo([173.18, 32.27], [179.75, 47.574], [179.75, 65.477]);
+    path.cubicCurveTo([179.75, 79.844], [174.121, 92.855], [162.754, 104.41]);
+    path.lineTo([225.0, 104.41]);
+    path.lineTo([225.0, 125.332]);
+    path.lineTo([136.062, 125.332]);
+    path.lineTo([136.062, 105.867]);
+    path.cubicCurveTo([151.18, 96.082], [158.793, 82.965], [158.793, 66.52]);
+    path.cubicCurveTo([158.793, 54.027], [154.207, 43.41], [145.133, 34.457]);
+    path.cubicCurveTo([135.961, 25.398], [125.117, 20.922], [112.605, 20.922]);
+    path.cubicCurveTo([99.883, 20.922], [89.039, 25.398], [79.969, 34.457]);
+    path.cubicCurveTo([70.898, 43.41], [66.312, 54.027], [66.312, 66.52]);
+    path.cubicCurveTo([66.312, 82.965], [73.816, 96.082], [88.938, 105.867]);
+    path.closePath();
+    path.moveTo([88.938, 105.867]);
+    path.fillColor = new GrayColor(1);
+    return {name:"libra",width:225, height:188,path:path};
+}

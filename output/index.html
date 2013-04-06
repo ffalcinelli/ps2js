@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>TEST</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="lib/paper.js"></script>
+    <script type="text/javascript" src="Zodiac/cancer.js"></script>
+    <script type="text/javascript">
+        paper.install(window);
+        $(function () {
+            paper.setup('myCanvas');
+            cancer();
+            paper.view.draw();
+        });
+    </script>
+
+</head>
+<body>
+<canvas id="myCanvas" width="300" height="265"></canvas>
+</body>
+</html>
