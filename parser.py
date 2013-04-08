@@ -111,14 +111,15 @@ class PSParser(object):
         """
         self.params = []
 
-    def write(self, fmt, *args):
+    def write(self, *args):
         """
         Utility function to write JS code line by line.
         When a line is written, current parameters stack got cleared
         """
         if self.indent:
             self.stream.write(" " * self.indent)
-        self.stream.write(fmt.format(*args))
+        for arg in args:
+            self.stream.write(arg)
         self.stream.write("\n")
         self.clear_params_stack()
 
@@ -138,29 +139,29 @@ class PSParser(object):
                     self.rectclip = m.groupdict() if m else None
                 else:
                     self.current_state.matrix[5] = float(self.rectclip["height"])
-                    print l[:-1]
+                    print(l[:-1])
                     tokens.extend(l.split())
 
-        self.write("function {0}(){{", self.shape_name)
+        self.write("function {0}(){{".format(self.shape_name))
         self.indent = 4
         #for each token identify the method to invoke
         for token in tokens:
             if token in cairo2ps.keys():
                 getattr(self, cairo2ps[token])()
             elif token.isalpha() or token == "f*":
-                print "//Skipping token %s with params %s" % (token, self.params)
+                print("//Skipping token {0} with params {1}".format(token, self.params))
                 self.clear_params_stack()
             else:
                 self.params.append(token)
         self.indent = 0
-        self.write("}}")
+        self.write("}")
 
     @path_required
     def _set_property(self, prop, value):
         self.current_state.style[prop] = value
-        if isinstance(value, basestring) and not value.strip().lower().startswith("new"):
+        if isinstance(value, str) and not value.strip().lower().startswith("new"):
             value = '"{}"'.format(value)
-        self.write("{0}.{1} = {2};", self.current_path, prop, value)
+        self.write("{0}.{1} = {2};".format(self.current_path, prop, value))
 
     def sixarrayastoreconcat(self):
         """
@@ -197,17 +198,18 @@ class PaperParser(PSParser):
             "setlinejoin": "strokeJoin",
         })
         self.current_state.style = {v: None for v in self.style_dict.values()}
-        self.path_format = kwargs.get("path_format", "path%s")
+        self.path_format = kwargs.get("path_format", "path{0}")
 
     def newpath(self):
         """
         Create a new JS Path object
         """
-        path = self.path_format % (len(self.paths) if len(self.paths) > 0 else '')
+        path = self.path_format.format(len(self.paths) if len(self.paths) > 0 else '')
         self.paths.append(path)
         self.states.append(copy.copy(self.current_state))
         self.current_state.path = path
-        self.stream.write("{1}var {0} = new CompoundPath();\n".format(self.current_path, " " * self.indent))
+        self.stream.write("{1}var {0} = new CompoundPath();\n".format(self.current_path,
+                                                                      " " * self.indent))
         # do not clear params. In case we have a newpath moveto combo there could be
         # parameters in stack which need to be processed
 
@@ -217,9 +219,8 @@ class PaperParser(PSParser):
         Move current path to position contained in parsed parameters
         """
         #TODO: rmoveto should be the relative one. Confusion???
-        self.write("{0}.moveTo({1});",
-                   self.current_path,
-                   self.apply_matrix_transform(Point(self.params)))
+        self.write("{0}.moveTo({1});".format(self.current_path,
+                                             self.apply_matrix_transform(Point(self.params))))
 
     @path_required
     def lineto(self):
@@ -227,28 +228,25 @@ class PaperParser(PSParser):
         Draw a line from current point to the position in parsed parameters
         """
         #TODO: rlineto should be the relative one. Confusion???
-        self.write("{0}.lineTo({1});",
-                   self.current_path,
-                   self.apply_matrix_transform(Point(self.params)))
+        self.write("{0}.lineTo({1});".format(self.current_path,
+                                             self.apply_matrix_transform(Point(self.params))))
 
     @path_required
     def curveto(self):
         """
         Draw a curve passing for the parsed parameters
         """
-        self.write("{0}.cubicCurveTo({1}, {2}, {3});",
-                   self.current_path,
-                   self.apply_matrix_transform(Point(self.params[0:2])),
-                   self.apply_matrix_transform(Point(self.params[2:4])),
-                   self.apply_matrix_transform(Point(self.params[4:6])))
+        self.write("{0}.cubicCurveTo({1}, {2}, {3});".format(self.current_path,
+                                                             self.apply_matrix_transform(Point(self.params[0:2])),
+                                                             self.apply_matrix_transform(Point(self.params[2:4])),
+                                                             self.apply_matrix_transform(Point(self.params[4:6]))))
 
     @path_required
     def closepath(self):
         """
         Close current path
         """
-        self.write("{0}.closePath();",
-                   self.current_path)
+        self.write("{0}.closePath();".format(self.current_path))
 
     @path_required
     def stroke(self):
@@ -256,7 +254,8 @@ class PaperParser(PSParser):
         Draw the path objects.
         This could be substituted by paper.view.draw() if not in PaperScript mode
         """
-        self.write("{0}.strokeColor = {1};".format(self.current_path, self.current_state.color))
+        self.write("{0}.strokeColor = {1};".format(self.current_path,
+                                                   self.current_state.color))
 
     @path_required
     def setmiterlimit(self):
@@ -296,11 +295,12 @@ class PaperParser(PSParser):
         m = dash_re.match(" ".join(self.params))
         if m:
             self.current_state.style["dashArray"] = [int(g) if g else 0 for g in m.groups()[:2]]
-            self.write("{0}.dashArray = [{1}, {2}];", self.current_path,
-                       self.current_state.style["dashArray"][0],
-                       self.current_state.style["dashArray"][0])
+            self.write("{0}.dashArray = [{1}, {2}];".format(self.current_path,
+                                                            self.current_state.style["dashArray"][0],
+                                                            self.current_state.style["dashArray"][1]))
             self.current_state.style["dashOffset"] = int(m.groups[-1])
-            self.write("{0}.dashOffset = {1};", self.current_path, self.current_state.style["dashOffset"])
+            self.write("{0}.dashOffset = {1};".format(self.current_path,
+                                                      self.current_state.style["dashOffset"]))
         self.clear_params_stack()
 
     @path_required
@@ -312,7 +312,6 @@ class PaperParser(PSParser):
         in a better way
         """
         self._set_property("fillColor", self.current_state.color)
-        pass
 
     def setgray(self):
         """
@@ -347,7 +346,7 @@ class PaperParser(PSParser):
         """
         style = ",".join(["{0}: {1}".format(k, v) for k, v in self.current_state.style.items() if v])
         if style:
-            self.write("{0}.style = {{{1}}};", self.current_path, style)
+            self.write("{0}.style = {{{1}}};".format(self.current_path, style))
 
     def showpage(self):
         """
@@ -357,13 +356,15 @@ class PaperParser(PSParser):
         if len(self.paths) > 1:
             self.states.append(copy.copy(self.current_state))
             self.current_state.path = "compoundPath"
-            self.write("var {0} = new CompoundPath([{1}]);", self.current_path, ",".join(self.paths))
+            self.write("var {0} = new CompoundPath([{1}]);".format(self.current_path,
+                                                                   ",".join(self.paths)))
             self._apply_style_from_state()
-        self.write("return {{name:\"{0}\",width:{1}, height:{2},path:{3}}};",
-                   self.shape_name,
-                   self.rectclip["width"],
-                   self.rectclip["height"],
-                   self.paths[0] if len(self.paths) == 1 else "compoundPath")
+        self.write("return {{name:\"{0}\",width:{1}, "
+                   "height:{2},path:{3}}};".format(self.shape_name,
+                                                   self.rectclip["width"],
+                                                   self.rectclip["height"],
+                                                   self.paths[0] if len(
+                                                       self.paths) == 1 else "compoundPath"))
 
 
 class CanvasParser(PSParser):
@@ -404,9 +405,8 @@ class CanvasParser(PSParser):
         Move current path to position contained in parsed parameters
         """
         #TODO: rmoveto should be the relative one. Confusion???
-        self.write("{0}.moveTo({1});",
-                   self.current_path,
-                   "{x}, {y}".format(**self.apply_matrix_transform(Point(self.params))))
+        self.write("{0}.moveTo({1});".format(self.current_path,
+                                             "{x}, {y}".format(**self.apply_matrix_transform(Point(self.params)))))
 
     @path_required
     def lineto(self):
@@ -414,28 +414,28 @@ class CanvasParser(PSParser):
         Draw a line from current point to the position in parsed parameters
         """
         #TODO: rlineto should be the relative one. Confusion???
-        self.write("{0}.lineTo({1});",
-                   self.current_path,
-                   "{x}, {y}".format(**self.apply_matrix_transform(Point(self.params))))
+        self.write("{0}.lineTo({1});".format(self.current_path,
+                                             "{x}, {y}".format(**self.apply_matrix_transform(Point(self.params)))))
 
     @path_required
     def curveto(self):
         """
         Draw a curve passing for the parsed parameters
         """
-        self.write("{0}.bezierCurveTo({1}, {2}, {3});",
-                   self.current_path,
-                   "{x}, {y}".format(**self.apply_matrix_transform(Point(self.params[0:2]))),
-                   "{x}, {y}".format(**self.apply_matrix_transform(Point(self.params[2:4]))),
-                   "{x}, {y}".format(**self.apply_matrix_transform(Point(self.params[4:6]))))
+        self.write("{0}.bezierCurveTo({1}, {2}, {3});".format(self.current_path,
+                                                              "{x}, {y}".format(**self.apply_matrix_transform(
+                                                                  Point(self.params[0:2]))),
+                                                              "{x}, {y}".format(**self.apply_matrix_transform(
+                                                                  Point(self.params[2:4]))),
+                                                              "{x}, {y}".format(**self.apply_matrix_transform(
+                                                                  Point(self.params[4:6])))))
 
     @path_required
     def closepath(self):
         """
         Close current path
         """
-        self.write("{0}.closePath();",
-                   self.current_path)
+        self.write("{0}.closePath();".format(self.current_path))
 
     @path_required
     def stroke(self):
@@ -479,7 +479,7 @@ class CanvasParser(PSParser):
         """
         Set the dash style to the current path
         """
-        print "//Not implemented yet setdash: {}".format(self.params)
+        print("//Not implemented yet setdash: {}".format(self.params))
         self.clear_params_stack()
 
     @path_required
@@ -487,7 +487,7 @@ class CanvasParser(PSParser):
         """
         In postscript the fill command clears the current path
         """
-        self.write("{0}.fill();", self.current_path)
+        self.write("{0}.fill();".format(self.current_path))
 
     def setgray(self):
         """
@@ -510,23 +510,22 @@ class CanvasParser(PSParser):
         Save the current state and clear the path
         """
         self.states.append(copy.copy(self.current_state))
-        self.write("{0}.save();", self.current_path)
+        self.write("{0}.save();".format(self.current_path))
 
     def grestore(self):
         """
         Restore the state "popping" it from the stack
         """
-        self.write("{0}.restore();", self.current_path)
+        self.write("{0}.restore();".format(self.current_path))
 
     def showpage(self):
         """
         This ends the page drawing
         """
-        self.write("return {{name:{0},width:{1}, height:{2},path:{3}}};",
-                   self.shape_name,
-                   self.rectclip["width"],
-                   self.rectclip["height"],
-                   self.current_path)
+        self.write("return {{name:{0},width:{1}, height:{2},path:{3}}};".format(self.shape_name,
+                                                                                self.rectclip["width"],
+                                                                                self.rectclip["height"],
+                                                                                self.current_path))
 
 
 if __name__ == "__main__":
