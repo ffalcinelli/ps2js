@@ -3,7 +3,7 @@ Intro
 
 ps2js is a python tool to translate postscript into html5 canvas or paper.js code.
 
-It works with simple PostScripts images generated with cairo (eg. by converting an SVG with Inkscape).
+It works with simple PostScript images generated with cairo (eg. by converting an SVG with Inkscape).
 
 Getting started
 ===============
