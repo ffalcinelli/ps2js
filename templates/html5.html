@@ -4,13 +4,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>TEST</title>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script type="text/javascript" src="lib/paper.js"></script>
-    <script type="text/javascript" src="cancer.js"></script>
+    <script type="text/javascript" src="{{ shape_name }}.js"></script>
     <script type="text/javascript">
         $(function () {
             var canvas = document.getElementById('myCanvas');
             var context = canvas.getContext('2d');
-            cancer(context);
+            {
+                {
+                    shape_name
+                }
+            }
+            (context);
         });
     </script>
 

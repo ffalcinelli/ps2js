@@ -75,10 +75,10 @@ class Point(_AttributeDict):
         Return the JS statement to represent a Point addition
         """
         return "[{p}.x{signx}{x},{p}.y{signy}{y}]".format(p=self.name,
-            signx="+" if point.x > 0 else ("-" if point.x < 0 else ""),
-            signy="+" if point.y > 0 else ("-" if point.y < 0 else ""),
-            x=abs(point.x) if abs(point.x) else "",
-            y=abs(point.y) if abs(point.y) else "")
+                                                          signx="+" if point.x > 0 else ("-" if point.x < 0 else ""),
+                                                          signy="+" if point.y > 0 else ("-" if point.y < 0 else ""),
+                                                          x=abs(point.x) if abs(point.x) else "",
+                                                          y=abs(point.y) if abs(point.y) else "")
 
     def js_sub(self, point):
         """

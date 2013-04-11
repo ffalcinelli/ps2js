@@ -14,7 +14,14 @@ Get the code by cloning the repo
 $ git clone git://github.com/ffalcinelli/ps2js.git
 ```
 
-Launch the script to read the help
+Create a virtualenv for the project (I assume you're using virtualenvwrapper.sh) and install the requirements
+
+```bash
+$ mkvirtualenv ps2js
+$ pip install -r requirements.txt
+```
+
+From inside the src dir, launch the script with -h option to read the help
 
 ```bash
 $ /ps2js.py -h
@@ -39,13 +46,14 @@ $ /ps2js.py -h
 Warm up!
 --------
 
-There are some postscripts in the samples folder. You can try to transform them by running
+There are some postscripts in the samples folder. You can try to run this example
 
 ```bash
-$ ./ps2js.py -o output -f paperjs samples/gnu.ps
+$ cd src
+$ ./ps2js.py -o ../output -f paperjs ../samples/gnu.ps
 ```
 
-And open the index.html to see the result
+And open the generated gnu.html to see the result
 
 
 License
@@ -59,6 +67,7 @@ TODOs
 -----
 
 1. ~~Make a TODO list~~
-2. Find a way to programmatically test the results
-3. Support other PS commands
-4. Improve the current ones
+2. Check differences between fill in paper.js and html5 canvas (gnu.ps does not work in html5 format)
+3. Find a way to programmatically test the results
+4. Support other PS commands
+5. Improve the current ones

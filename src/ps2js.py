@@ -4,6 +4,11 @@ import argparse
 import os
 from parser import CanvasParser, PaperParser
 from shared import _AttributeDict
+from template import generate_template
+
+__author__ = 'fabio'
+__program__ = "ps2js"
+__version__ = '0.1alpha'
 
 env = _AttributeDict({"input_dir": None,
                       "output_dir": os.path.dirname(
@@ -43,9 +48,9 @@ def convert(ps_list, output_dir):
     """
     Convert PostScript files into a JavaScript
     Write the resulting file into the output_dir directory.
-    If a directory is passed as input, it will be scanned recursively
-    for .ps files to parse.
     """
+
+    #TODO: recursive option
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -54,22 +59,28 @@ def convert(ps_list, output_dir):
     #    print "OUT", output_dir
 
     for item in ps_list:
-        if os.path.isdir(item):
-            files = os.listdir(item)
-            convert([os.path.join(item, f) for f in files],
-                    os.path.join(output_dir, os.path.basename(item)))
-        else:
-            js_name, extension = os.path.splitext(os.path.basename(item))
-            if extension.lower() == ".ps":
-                js_filename = os.path.join(output_dir, "{0}.{1}".format(js_name, "js"))
+        # if os.path.isdir(item):
+        #     files = os.listdir(item)
+        #     convert([os.path.join(item, f) for f in files],
+        #             os.path.join(output_dir, os.path.basename(item)))
+        # else:
+        js_name, extension = os.path.splitext(os.path.basename(item))
+        print(js_name)
+        if extension.lower() == ".ps":
+            js_filename = os.path.join(output_dir, "{0}.{1}".format(js_name, "js"))
+            html_filename = os.path.join(output_dir, "{0}.{1}".format(js_name, "html"))
 
-                print("Converting {0} --> {1}".format(item, js_filename))
+            print("Converting {0} --> {1}".format(item, js_filename))
 
-                Parser = parser_dict[env.format]
-                with open(js_filename, "w") as js_file:
-                    Parser(item, js_file, shape_name=js_name).run()
+            Parser = parser_dict[env.format]
+            with open(js_filename, "w") as js_file:
+                Parser(item, js_file, shape_name=js_name).run()
+            with open(html_filename, "w") as html_file:
+                #TODO: the paperjs format requires lib/paper.js in output directory...
+                html_file.write(generate_template(output_format=env.format, shape_name=js_name))
 
 
 if __name__ == "__main__":
+    print("{} - {}".format(__program__, __version__))
     parse_options()
     convert(env.ps_files, env.output_dir)

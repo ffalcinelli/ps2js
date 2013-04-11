@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import copy
+import sys
+
 import os
 import re
-import sys
+
 from geometry import Point, matrix_transform
 from shared import _AttributeDict
+
 
 __author__ = 'fabio'
 
