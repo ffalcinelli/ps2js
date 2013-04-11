@@ -30,7 +30,7 @@ cairo2ps = {
 }
 
 dash_re = re.compile(r"\[(\d*.?\d*) (\d*.?\d*)\] (\d*.?\d*)")
-rectclip_re = re.compile(r"^q (?P<x>\d+.?\d*) (?P<y>\d+.?\d*) "
+rectclip_re = re.compile(r"^q (?P<x>-?\d+.?\d*) (?P<y>-?\d+.?\d*) "
                          r"(?P<width>\d+.?\d*) (?P<height>\d+.?\d*) "
                          r"rectclip q$")
 
@@ -74,6 +74,17 @@ def new_path_required(funct):
     return wrapper
 
 
+def wrap_js_funct(funct):
+    def wrapper(parser, *args, **kwargs):
+        parser.write("function {0}({1}){{".format(parser.shape_name, parser.funct_params))
+        parser.indent = 4
+        funct(parser, *args, **kwargs)
+        parser.indent = 0
+        parser.write("}")
+
+    return wrapper
+
+
 class PSParser(object):
     """
     """
@@ -89,7 +100,7 @@ class PSParser(object):
         self.states.append(GraphicState())
         self.indent = indent
         self.shape_name = shape_name
-
+        self.funct_params = ""
 
     @property
     def current_state(self):
@@ -126,6 +137,7 @@ class PSParser(object):
     def apply_matrix_transform(self, point):
         return matrix_transform(point, self.current_state.matrix)
 
+    @wrap_js_funct
     def run(self):
         """
         Starts the parser
@@ -142,8 +154,8 @@ class PSParser(object):
                     print(l[:-1])
                     tokens.extend(l.split())
 
-        self.write("function {0}(){{".format(self.shape_name))
-        self.indent = 4
+        # self.write("function {0}(){{".format(self.shape_name))
+        # self.indent = 4
         #for each token identify the method to invoke
         for token in tokens:
             if token in cairo2ps.keys():
@@ -153,8 +165,8 @@ class PSParser(object):
                 self.clear_params_stack()
             else:
                 self.params.append(token)
-        self.indent = 0
-        self.write("}")
+
+    # self.write("}")
 
     @path_required
     def _set_property(self, prop, value):
@@ -199,6 +211,7 @@ class PaperParser(PSParser):
         })
         self.current_state.style = {v: None for v in self.style_dict.values()}
         self.path_format = kwargs.get("path_format", "path{0}")
+        self.funct_params = ""
 
     def newpath(self):
         """
@@ -312,6 +325,8 @@ class PaperParser(PSParser):
         in a better way
         """
         self._set_property("fillColor", self.current_state.color)
+        # self.closepath()
+        self.newpath()
 
     def setgray(self):
         """
@@ -332,6 +347,7 @@ class PaperParser(PSParser):
         Save the current state and clear the path
         """
         self.states.append(copy.copy(self.current_state))
+        print("GSAVE [{}]-->{}".format(len(self.states), self.states))
 
     def grestore(self):
         """
@@ -339,6 +355,7 @@ class PaperParser(PSParser):
         """
         if self.states and len(self.states) > 1:
             self.states.pop()
+        print("GRESTORE [{}]-->{}".format(len(self.states), self.states))
 
     def _apply_style_from_state(self):
         """
@@ -384,20 +401,21 @@ class CanvasParser(PSParser):
         self.current_state.style = {v: None for v in self.style_dict.values()}
         self.canvas_id = kwargs.get("canvas_id", "myCanvas")
         self.path_name = kwargs.get("path_format", "context")
+        self.funct_params = "context"
 
     def newpath(self):
         """
         Create a new JS Path object
         """
         self.current_state.path = self.path_name
-
-        if len(self.paths) == 1:
-            self.stream.write(
-                "{1}var canvas = document.getElementById('{0}');\n".format(self.canvas_id, " " * self.indent))
-            self.stream.write("{1}var {0} = canvas.getContext('2d');\n".format(self.current_path, " " * self.indent))
-            self.stream.write("{1}{0}.beginPath();\n".format(self.current_path, " " * self.indent))
-            # do not clear params. In case we have a newpath moveto combo there could be
-            # parameters in stack which need to be processed
+        #print("Current paths {}".format(len(self.paths)))
+        # if len(self.paths) == 0:
+        #     self.stream.write(
+        #         "{1}var canvas = document.getElementById('{0}');\n".format(self.canvas_id, " " * self.indent))
+        #     self.stream.write("{1}var {0} = canvas.getContext('2d');\n".format(self.current_path, " " * self.indent))
+        self.stream.write("{1}{0}.beginPath();\n".format(self.current_path, " " * self.indent))
+        # do not clear params. In case we have a newpath moveto combo there could be
+        # parameters in stack which need to be processed
 
     @path_required
     def moveto(self):
@@ -487,14 +505,20 @@ class CanvasParser(PSParser):
         """
         In postscript the fill command clears the current path
         """
+        #TODO: pass color
+        self.write("{0}.fillStyle = \"{1}\";".format(self.current_path,
+                                                     "#ffffff" if self.current_state.color == 1 else "#000000"))
         self.write("{0}.fill();".format(self.current_path))
+        self.closepath()
+        self.newpath()
+
 
     def setgray(self):
         """
         Set the current color to the passed gray tonality
         """
         #TODO implement grayscale mapping
-        self.current_state.color = "black"
+        self.current_state.color = self.params[0]
         self.clear_params_stack()
 
     def setrgbcolor(self):
@@ -522,10 +546,10 @@ class CanvasParser(PSParser):
         """
         This ends the page drawing
         """
-        self.write("return {{name:{0},width:{1}, height:{2},path:{3}}};".format(self.shape_name,
-                                                                                self.rectclip["width"],
-                                                                                self.rectclip["height"],
-                                                                                self.current_path))
+        self.write("return {{name:\"{0}\",width:{1}, height:{2},path:{3}}};".format(self.shape_name,
+                                                                                    self.rectclip["width"],
+                                                                                    self.rectclip["height"],
+                                                                                    self.current_path))
 
 
 if __name__ == "__main__":

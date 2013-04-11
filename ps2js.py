@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
-import sys
 from parser import CanvasParser, PaperParser
 from shared import _AttributeDict
 
@@ -16,13 +15,13 @@ env = _AttributeDict({"input_dir": None,
 
 parser_dict = {"html5": CanvasParser, "paperjs": PaperParser}
 
+
 #This will take care of all necessary parameters
 def parse_options():
     """
     Handle command-line arguments. Each option will be put
     into the shared env dictionary.
     """
-    #TODO: create arguments dinamycally from the env shared dictionary
 
     parser = argparse.ArgumentParser(description="Transform a PostScript into JavaScript",
                                      epilog="Good luck! :-)")
@@ -42,7 +41,7 @@ def parse_options():
 
 def convert(ps_list, output_dir):
     """
-    Convert a PostScript file into a JavaScript
+    Convert PostScript files into a JavaScript
     Write the resulting file into the output_dir directory.
     If a directory is passed as input, it will be scanned recursively
     for .ps files to parse.
@@ -63,7 +62,9 @@ def convert(ps_list, output_dir):
             js_name, extension = os.path.splitext(os.path.basename(item))
             if extension.lower() == ".ps":
                 js_filename = os.path.join(output_dir, "{0}.{1}".format(js_name, "js"))
-                sys.stdout.write("Converting {0} --> {1}\n".format(item, js_filename))
+
+                print("Converting {0} --> {1}".format(item, js_filename))
+
                 Parser = parser_dict[env.format]
                 with open(js_filename, "w") as js_file:
                     Parser(item, js_file, shape_name=js_name).run()

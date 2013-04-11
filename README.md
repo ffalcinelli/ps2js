@@ -42,10 +42,10 @@ Warm up!
 There are some postscripts in the samples folder. You can try to transform them by running
 
 ```bash
-$ ./ps2js.py -o output -f paperjs samples/Zodiac
+$ ./ps2js.py -o output -f paperjs samples/gnu.ps
 ```
 
-And change the index.html to see the result
+And open the index.html to see the result
 
 
 License
